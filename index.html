@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>WebGPU Life</title>
+    </head>
+
+    <body>
+        <canvas width="512" height="512"></canvas>
+        <script type="module">
+            const canvas = document.querySelector("canvas");
+
+            //Where WebGPU code will be
+
+            if (!navigator.gpu) {
+                //Ideally want to further have a page fall back mode that doesnt use WebGPU
+                throw new Error("WebGPU not supported on this browser.");
+            }
+
+            const adapter = await navigator.gpu.requestAdapter();
+            if (!adapter) {
+                throw new Error("No appropriate GPUAdapter found.");
+            }
+
+            const device = await adapter.requestDevice();
+
+            const context = canvas.getContext("webgpu");
+            const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
+            context.configure({
+                device: device,
+                format: canvasFormat, //texture format the context should use
+            });
+
+            const encoder = device.createCommandEncoder(); //provides interface for recording gpu commands
+
+            const pass = encoder.beginRenderPass({
+                colorAttachments: [{
+                    view: context.getCurrentTexture().createView(),
+                    loadOp: "clear",
+                    clearValue: {r: 0, g: 0, b:0.4, a:1},
+                    storeOp: "store",
+                }]
+            })
+            pass.end(); //Note these calls dont make the GPU do anything, just record commands to later be done by GPU
+
+            //const commandBuffer = encoder.finish();
+
+            //finish the command buffer and immediately submit it
+            device.queue.submit([encoder.finish]);
+
+
+        </script>
+    </body>
+</html>
