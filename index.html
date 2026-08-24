@@ -32,6 +32,41 @@
                 format: canvasFormat, //texture format the context should use
             });
 
+            const vertices = new Float32Array([
+                // X    Y
+                -0.8, -0.8, //Triangle 1 (Blue)
+                0.8, -0.8,
+                0.8, 0.8,
+                
+                -0.8, -0.8, //Triangle 2 (Red)
+                0.8,  0.8,
+                -0.8, 0.8
+            ]);
+
+            const vertexBuffer = device.createBuff({
+                label: "Cell vertices",
+                size: vertices.byteLength,
+                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST, 
+            });
+
+            device.queue.writeBuffer(vertexBuffer, 0, vertices);
+
+            const vertexBufferLayout = {
+                arrayStride: 8,
+                attributes: [{
+                    format: "float32x2",
+                    offset: 0,
+                    shaderLocation: 0, 
+                }],
+            };
+
+            const cellShaderModule = device.createrShaderModule({
+                label: "Cell shader",
+                code:`
+                 // Shader code goes here.
+                `
+            })
+
             const encoder = device.createCommandEncoder(); //provides interface for recording gpu commands
 
             const pass = encoder.beginRenderPass({
